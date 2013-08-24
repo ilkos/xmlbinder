@@ -1,7 +1,6 @@
 package com.ilkos.xmlq.lib;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -10,10 +9,10 @@ import com.ilkos.xmlq.lib.exception.XMLBinderException;
 
 public class ReaderDelegate {
 	private final XMLStreamReader reader;
-	private final XMLClassResolver resolver;
-	private static final TypeConverter simpleTypeConverter = new SimpleTypeConverter();
+	private final XMLObjectResolver resolver;
+	private static final SimpleTypeConverter typeConverter = new SimpleTypeConverter();
 
-	public ReaderDelegate(XMLStreamReader reader, XMLClassResolver resolver) {
+	public ReaderDelegate(XMLStreamReader reader, XMLObjectResolver resolver) {
 		this.reader = reader;
 		this.resolver = resolver;
 	}
@@ -22,8 +21,8 @@ public class ReaderDelegate {
 		if (!reader.isStartElement()) {
 			throw new XMLBinderException("Expected start element not found");
 		}
-		final String elementName = reader.getName().getLocalPart();
 
+		final String elementName = reader.getName().getLocalPart();
 		final T inst = instantiate(cls);
 
 		// TODO: go through attributes if any
@@ -31,28 +30,26 @@ public class ReaderDelegate {
 
 		}
 
-		// TODO: deserialise for collections
 		try {
 			reader.next();
 			while (!reader.isEndElement()) {
 
 				if (reader.isStartElement()) {
-					try {
-						Method setter = resolver.setter(cls, reader.getName().getLocalPart());
-						setter.invoke(inst, deserialise(setter.getParameterTypes()[0]));
+					ResolvedAccessor elementAccessor = resolver.getElementObject(cls, reader.getName().getLocalPart());
+					if (elementAccessor != null) {
+						if (typeConverter.isSimple(elementAccessor.getValueType())) {
+							// elementAccessor.set(inst, typeConverter.convert());
+						}
+						else {
+							elementAccessor.set(inst, deserialise(elementAccessor.getValueType()));
+						}
 					}
-					catch (ResolverExceptionMethodNotFound e) {
+					else {
 						throw new XMLBinderException();
 					}
 				}
 				else if (reader.isCharacters()) {
-					try {
-						Method setter = resolver.setter(cls, elementName);
-						setter.invoke(inst, simpleTypeConverter.convert(setter.getParameterTypes()[0], reader.getText()));
-					}
-					catch (ResolverExceptionMethodNotFound e) {
-						throw new XMLBinderException();
-					}
+					
 				}
 
 				if (!reader.hasNext()) {

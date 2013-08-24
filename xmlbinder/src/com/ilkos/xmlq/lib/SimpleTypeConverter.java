@@ -1,8 +1,7 @@
 package com.ilkos.xmlq.lib;
 
-public class SimpleTypeConverter implements TypeConverter {
+public class SimpleTypeConverter {
 
-	@Override
 	public Object convert(Class<?> target, String s) {
 		if (target.isAssignableFrom(String.class)) {
 			return s;
@@ -36,4 +35,7 @@ public class SimpleTypeConverter implements TypeConverter {
 		}
 	}
 
+	public boolean isSimple(Class<?> cls) {
+		return true;
+	}
 }

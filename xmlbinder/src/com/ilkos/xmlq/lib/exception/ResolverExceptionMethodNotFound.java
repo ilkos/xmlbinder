@@ -1,4 +1,4 @@
-package com.ilkos.xmlq.lib;
+package com.ilkos.xmlq.lib.exception;
 
 public class ResolverExceptionMethodNotFound extends Exception {
 

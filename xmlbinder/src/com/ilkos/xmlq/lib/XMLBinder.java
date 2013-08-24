@@ -12,10 +12,11 @@ import com.ilkos.xmlq.lib.exception.XMLBinderException;
 public class XMLBinder {
 	// TODO: to be replaced with generic provider
 	private final XMLInputFactory xmlFactory;
-	// Resolver interface - strict / non-strict / defaulting implementations
-	private final XMLClassResolver resolver;
 
-	public XMLBinder(XMLInputFactory xmlFactory, XMLClassResolver resolver) {
+	// Resolver interface - strict / non-strict / defaulting implementations
+	private final XMLObjectResolver resolver;
+
+	public XMLBinder(XMLInputFactory xmlFactory, XMLObjectResolver resolver) {
 		this.xmlFactory = xmlFactory;
 		this.resolver = resolver;
 	}
