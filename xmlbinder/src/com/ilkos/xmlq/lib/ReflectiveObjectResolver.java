@@ -68,12 +68,12 @@ public class ReflectiveObjectResolver implements XMLObjectResolver {
 
 	@Override
 	public ResolvedAccessor getAttributeObject(Class<?> cls, String xmlAttributeName) {
-		return resolve(cls).get(xmlAttributeName);
+		return resolve(cls).get(xmlAttributeName.toLowerCase());
 	}
 
 	@Override
 	public ResolvedAccessor getElementObject(Class<?> cls, String xmlElementName) {
-		return resolve(cls).get(xmlElementName);
+		return resolve(cls).get(xmlElementName.toLowerCase());
 	}
 
 	@Override

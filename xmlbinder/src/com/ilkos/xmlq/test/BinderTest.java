@@ -18,6 +18,7 @@ public class BinderTest {
 
 	public static class TestContainer {
 		private String innerText;
+		private Integer magic;
 		
 		public void setInnerText(String container) {
 			innerText = container;
@@ -26,12 +27,21 @@ public class BinderTest {
 		public String getInnerText() {
 			return innerText;
 		}
+		
+		public void setMagic(Integer magic) {
+			this.magic = magic;
+		}
+		
+		public Integer getMagic() {
+			return magic;
+		}
 	}
 
 	@Test
 	public void test() throws FileNotFoundException, XMLBinderException, UnsupportedEncodingException {
 		String xml = "<text>" +
 				"<innerText>Inner test</innerText>" +
+				"<magic>42</magic>" +
 				"</text>";
 		XMLBinder nQ = new XMLBinder(XMLInputFactory.newInstance(), new ReflectiveObjectResolver());
 		
@@ -39,6 +49,7 @@ public class BinderTest {
 				new ByteArrayInputStream(xml.getBytes("UTF-8")),
 				TestContainer.class);
 		assertEquals(res.getInnerText(), "Inner test");
+		assertEquals(res.getMagic(), Integer.valueOf(42));
 	}
 
 }

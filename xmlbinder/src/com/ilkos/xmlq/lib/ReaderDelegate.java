@@ -10,20 +10,18 @@ import com.ilkos.xmlq.lib.exception.XMLBinderException;
 public class ReaderDelegate {
 	private final XMLStreamReader reader;
 	private final XMLObjectResolver resolver;
-	private static final SimpleTypeConverter typeConverter = new SimpleTypeConverter();
 
 	public ReaderDelegate(XMLStreamReader reader, XMLObjectResolver resolver) {
 		this.reader = reader;
 		this.resolver = resolver;
 	}
 
-	public <T> T deserialise(Class<T> cls) throws XMLBinderException {
+	public <T> T deserialiseElement(Class<T> cls) throws XMLBinderException {
 		if (!reader.isStartElement()) {
 			throw new XMLBinderException("Expected start element not found");
 		}
 
-		final String elementName = reader.getName().getLocalPart();
-		final T inst = instantiate(cls);
+		final T inst = GenericObjectFactory.instantiate(cls);
 
 		// TODO: go through attributes if any
 		for (int i = 0; i < reader.getAttributeCount(); ++i) {
@@ -37,19 +35,23 @@ public class ReaderDelegate {
 				if (reader.isStartElement()) {
 					ResolvedAccessor elementAccessor = resolver.getElementObject(cls, reader.getName().getLocalPart());
 					if (elementAccessor != null) {
-						if (typeConverter.isSimple(elementAccessor.getValueType())) {
-							// elementAccessor.set(inst, typeConverter.convert());
+						// leaf nodes
+						if (SimpleTypeConverter.isSimple(elementAccessor.getValueType())) {
+							elementAccessor.set(inst,
+									SimpleTypeConverter.convert(elementAccessor.getValueType(),
+											deserialiseField()));
 						}
 						else {
-							elementAccessor.set(inst, deserialise(elementAccessor.getValueType()));
+							elementAccessor.set(inst, deserialiseElement(elementAccessor.getValueType()));
 						}
 					}
 					else {
-						throw new XMLBinderException();
+						throw new XMLBinderException("Could not resolve " + reader.getName().getLocalPart());
 					}
 				}
 				else if (reader.isCharacters()) {
-					
+					// TODO
+					// ResolvedAccessor pcDataAccessor = resolver.getPCDataObject(cls);
 				}
 
 				if (!reader.hasNext()) {
@@ -73,18 +75,36 @@ public class ReaderDelegate {
 			throw new XMLBinderException();
 		}
 	}
+	
+	public String deserialiseField() throws XMLBinderException {
+		if (!reader.isStartElement()) {
+			throw new XMLBinderException("Expected start element not found");
+		}
+		
+		if (reader.getAttributeCount() > 0) {
+			throw new XMLBinderException("Attributes present on field");
+		}
+		
+		String result = null;
 
-	private <T> T instantiate(Class<T> cls) throws XMLBinderException {
-		T obj = null;
 		try {
-			obj = cls.newInstance();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-			throw new XMLBinderException();
-		} catch (IllegalAccessException e) {
+			reader.next();
+			while (!reader.isEndElement()) {
+				if (reader.isStartElement()) {
+					throw new XMLBinderException("Nested element present on field");
+				}
+				else if (reader.isCharacters()) {
+					result = reader.getText();
+				}
+				
+				reader.next();
+			}
+		}
+		catch (XMLStreamException e) {
 			e.printStackTrace();
 			throw new XMLBinderException();
 		}
-		return obj;
+		
+		return result;
 	}
 }

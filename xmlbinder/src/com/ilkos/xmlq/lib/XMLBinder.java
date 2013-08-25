@@ -33,7 +33,7 @@ public class XMLBinder {
 		T data;
 		try {
 			ReaderDelegate reader = new ReaderDelegate(streamReader, resolver);
-			data = reader.deserialise(cls);
+			data = reader.deserialiseElement(cls);
 		} finally {
 			try {
 				streamReader.close();

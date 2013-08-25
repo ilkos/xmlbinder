@@ -2,7 +2,7 @@ package com.ilkos.xmlq.lib;
 
 public class SimpleTypeConverter {
 
-	public Object convert(Class<?> target, String s) {
+	public static Object convert(Class<?> target, String s) {
 		if (target.isAssignableFrom(String.class)) {
 			return s;
 		}
@@ -35,7 +35,15 @@ public class SimpleTypeConverter {
 		}
 	}
 
-	public boolean isSimple(Class<?> cls) {
-		return true;
+	public static boolean isSimple(Class<?> cls) {
+		return cls.isAssignableFrom(String.class) ||
+				cls.isAssignableFrom(Boolean.class) ||
+				cls.isAssignableFrom(Byte.class) ||
+				cls.isAssignableFrom(Short.class) ||
+				cls.isAssignableFrom(Integer.class) ||
+				cls.isAssignableFrom(Float.class) ||
+				cls.isAssignableFrom(Long.class) ||
+				cls.isAssignableFrom(Float.class) ||
+				cls.isAssignableFrom(Double.class);
 	}
 }
